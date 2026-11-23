@@ -6,6 +6,8 @@ import { Button, CardImage, ErrorText, GradeSlab, Link, Muted, Panel, Prices, s 
 import { getItem, remove, upsert, useBinder } from '../../lib/binder';
 import { ebaySold, getCard, rawPriceAud, variantKey, variantLabel } from '../../lib/tcg';
 import { estimateGraded } from '../../lib/ai';
+import { CardPicker } from '../../lib/CardPicker';
+import type { TcgCard } from '../../lib/tcg';
 
 const day = (ms?: number | null) => (ms ? new Date(ms).toLocaleDateString('en-AU', { day: 'numeric', month: 'short', year: 'numeric' }) : '');
 
@@ -17,6 +19,7 @@ export default function Item() {
   const [busy, setBusy] = useState<'price' | 'graded' | null>(null);
   const [err, setErr] = useState('');
   const [confirm, setConfirm] = useState(false);
+  const [picking, setPicking] = useState(false);
 
   if (!it || it.deleted) return <View style={s.screen}><Muted>This card isn't in your binder.</Muted></View>;
   const item = it;
@@ -32,6 +35,15 @@ export default function Item() {
     finally { setBusy(null); }
   }
 
+  // Link this binder card to the official card: picture, set details and live price.
+  async function pick(c: TcgCard) {
+    setPicking(false); setErr('');
+    const raw = await rawPriceAud(c, item.raw?.variant ?? variantKey(item.variant)).catch(() => null);
+    await upsert({ ...item, cardId: c.id, image: c.images.small, name: c.name, setName: c.set.name,
+      number: `${c.number}${c.set.printedTotal ? '/' + c.set.printedTotal : ''}`, rarity: c.rarity ?? item.rarity,
+      raw: raw ?? item.raw, pricedAt: raw ? Date.now() : item.pricedAt });
+  }
+
   const rawShown = item.raw ?? item.rawEstimate;
   const rawLabel = item.raw
     ? `Live ${item.raw.source}${item.raw.variant ? ' · ' + variantLabel(item.raw.variant) : ''}`
@@ -40,7 +52,17 @@ export default function Item() {
   return (
     <ScrollView contentContainerStyle={s.screen}>
       <Stack.Screen options={{ title: item.name }} />
-      <View style={{ alignItems: 'center' }}><CardImage uri={item.image} width={200} /></View>
+      <View style={{ alignItems: 'center', gap: 8 }}>
+        <CardImage uri={item.image} width={200} />
+        {!picking ? <Text style={s.link} onPress={() => setPicking(true)}>{item.image ? 'Wrong card? Choose another' : 'Add the official card picture'}</Text> : null}
+      </View>
+      {picking ? (
+        <Panel>
+          <Text style={{ fontWeight: '700', color: C.ink }}>Choose the matching card</Text>
+          <CardPicker initialQuery={`${item.name} ${(item.number || '').split('/')[0]}`.trim()} onPick={pick} />
+          <Button title="Cancel" onPress={() => setPicking(false)} />
+        </Panel>
+      ) : null}
       <Panel>
         <View style={{ gap: 4 }}>
           <Text style={s.h1}>{item.name}</Text>

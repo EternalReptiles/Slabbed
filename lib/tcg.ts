@@ -71,7 +71,7 @@ export async function searchCards(text: string, signal?: AbortSignal): Promise<T
   // "Charizard 4/102" or "charizard 4" -> name + number; otherwise a name search.
   const m = t.match(/^(.*?)[\s#]+(\w+)(?:\/\w+)?$/);
   const parts: string[] = [];
-  if (m && /\d/.test(m[2]) && m[1].trim()) parts.push(`name:"${esc(m[1])}*"`, `number:${esc(m[2])}`);
+  if (m && /\d/.test(m[2]) && m[1].trim()) parts.push(`name:"${esc(m[1])}*"`, `number:"${esc(m[2].replace(/^0+(?=\d)/, ''))}"`);
   else parts.push(`name:"${esc(t)}*"`);
   const q = encodeURIComponent(parts.join(' '));
   const res = await get<{ data: TcgCard[] }>(`/cards?q=${q}&orderBy=-set.releaseDate&pageSize=40`, signal);
@@ -85,22 +85,36 @@ export async function getCard(id: string): Promise<TcgCard> {
 
 // Find the card the scanner identified: by set name + number first, then name + number, then name.
 export async function matchCard(name: string, number: string, setName: string): Promise<TcgCard | null> {
-  const num = (number || '').split('/')[0].replace(/^0+(?=\d)/, '').trim();
-  const nm = esc(name.replace(/\s+(ex|EX|GX|V|VMAX|VSTAR)$/, ' $1'));
-  const tries: string[] = [];
-  if (num && setName) tries.push(`name:"${nm}" number:${esc(num)} set.name:"${esc(setName)}"`);
-  if (num) tries.push(`name:"${nm}" number:${esc(num)}`);
-  if (num && setName) tries.push(`number:${esc(num)} set.name:"${esc(setName)}"`);
-  // Set names match by prefix ("Base" also finds "Base Set 2"), so prefer an exact set-name match.
   const norm = (x: string) => x.toLowerCase().replace(/[^a-z0-9]/g, '');
+  const first = (number || '').split('/')[0].trim();
+  const num = first.replace(/^0+(?=\d)/, '');            // "025" -> "25", "SV049" stays
+  const nm = esc(name);
+  const base = esc(name.replace(/\s+(ex|EX|GX|V|VMAX|VSTAR|BREAK|LV\.X|Prime|Star|δ)$/i, ''));
   const want = norm(setName);
+  const sameNum = (c: TcgCard) => num && (norm(c.number) === norm(num) || norm(c.number) === norm(first));
+  // Set names match by prefix ("Base" also finds "Base Set 2"), so prefer an exact set-name match.
+  const best = (list: TcgCard[]) => list.find(c => want && norm(c.set.name) === want) ?? list[0];
+
+  const tries: string[] = [];
+  if (num && setName) tries.push(`name:"${nm}" number:"${esc(num)}" set.name:"${esc(setName)}"`);
+  if (num) tries.push(`name:"${nm}" number:"${esc(num)}"`);
+  if (num && first !== num) tries.push(`name:"${nm}" number:"${esc(first)}"`);
+  if (num && base !== nm) tries.push(`name:"${base}*" number:"${esc(num)}"`);
+  if (num && setName) tries.push(`number:"${esc(num)}" set.name:"${esc(setName)}"`);
   for (const q of tries) {
     try {
       const res = await get<{ data: TcgCard[] }>(`/cards?q=${encodeURIComponent(q)}&orderBy=-set.releaseDate&pageSize=10`);
-      const list = res.data ?? [];
-      if (list.length) return list.find(c => want && norm(c.set.name) === want) ?? list[0];
+      if (res.data?.length) return best(res.data);
     } catch {}
   }
+  // Last try: every printing of the name, keep one with the same number (or the same set if no number).
+  try {
+    const res = await get<{ data: TcgCard[] }>(`/cards?q=${encodeURIComponent(`name:"${base}*"`)}&orderBy=-set.releaseDate&pageSize=250&select=id,name,number,rarity,images,set,tcgplayer,cardmarket`);
+    const list = res.data ?? [];
+    const byNum = list.filter(sameNum);
+    if (byNum.length) return best(byNum);
+    if (!num && want) return list.find(c => norm(c.set.name) === want) ?? null;
+  } catch {}
   return null;
 }
 

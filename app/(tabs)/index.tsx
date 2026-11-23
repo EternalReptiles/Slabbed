@@ -7,6 +7,7 @@ import { Button, CardImage, ErrorText, Eyebrow, GradeSlab, Link, Muted, Panel, P
 import { gradeCard, identify, prepPhoto, type Grade, type Identified } from '../../lib/ai';
 import { ebaySold, matchCard, rawPriceAud, variantKey, variantLabel, type RawPrice, type TcgCard } from '../../lib/tcg';
 import { getItem, newId, upsert } from '../../lib/binder';
+import { CardPicker } from '../../lib/CardPicker';
 
 type Photo = { uri: string; b64: string };
 
@@ -20,6 +21,7 @@ export default function Scan() {
   const [busy, setBusy] = useState<'identify' | 'grade' | 'photo' | null>(null);
   const [err, setErr] = useState('');
   const [savedId, setSavedId] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
 
   async function pick(side: 'front' | 'back', camera: boolean) {
     setErr('');
@@ -47,7 +49,7 @@ export default function Scan() {
     setBusy('identify'); setErr(''); setSavedId(null);
     try {
       const r = await identify(front.b64, back?.b64);
-      setIdent(r); setMatch(null); setRaw(null);
+      setIdent(r); setMatch(null); setRaw(null); setPicking(false);
       if (r.found) {
         const m = await matchCard(r.name, r.number, r.set_name).catch(() => null);
         setMatch(m);
@@ -74,6 +76,15 @@ export default function Scan() {
     } catch (e) {
       setErr(e instanceof Error ? e.message : 'Something went wrong.');
     } finally { setBusy(null); }
+  }
+
+  // You chose the official card yourself.
+  async function pickCard(c: TcgCard) {
+    setMatch(c); setPicking(false);
+    setRaw(await rawPriceAud(c, variantKey(ident?.variant)).catch(() => null));
+    const saved = savedId ? getItem(savedId) : undefined;
+    if (saved) await upsert({ ...saved, cardId: c.id, image: c.images.small, name: c.name, setName: c.set.name,
+      number: `${c.number}${c.set.printedTotal ? '/' + c.set.printedTotal : ''}`, rarity: c.rarity ?? saved.rarity });
   }
 
   async function save() {
@@ -155,6 +166,14 @@ export default function Scan() {
           </View>
           <Prices raw={rawForDisplay} rawLabel={rawLabel} graded={ident.graded_aud} gradedLabel="Graded prices are Claude's estimates from recent sales, not live data." />
           {ident.notes ? <Muted small>{ident.notes}</Muted> : null}
+          {!match || picking ? (
+            <View style={{ gap: 8, borderTopWidth: 1, borderTopColor: C.line, paddingTop: 12 }}>
+              <Text style={{ fontWeight: '700', color: C.ink }}>{match ? 'Choose the right card' : 'Choose the matching card'}</Text>
+              <Muted small>{match ? 'Tap the card that matches yours.' : "We couldn't find this card automatically. Tap the one that matches yours to get its official picture and live price."}</Muted>
+              <CardPicker initialQuery={`${ident.name} ${(ident.number || '').split('/')[0]}`.trim()} onPick={pickCard} />
+              {match ? <Button title="Cancel" onPress={() => setPicking(false)} /> : null}
+            </View>
+          ) : <Text style={s.link} onPress={() => setPicking(true)}>Wrong card? Choose another</Text>}
           <View style={{ flexDirection: 'row', gap: 16, flexWrap: 'wrap' }}>
             <Link title="eBay AU sold (raw)" url={ebaySold(`${ident.name} ${ident.number}`)} />
             <Link title="eBay AU sold (PSA 10)" url={ebaySold(`${ident.name} ${ident.number} PSA 10`)} />
