@@ -4,7 +4,7 @@ import { ActivityIndicator, Image, Linking, Platform, Pressable, StyleSheet, Tex
 const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' });
 import { C, CARD_RATIO, FOIL } from './theme';
 import { aud } from './money';
-import { gradeRange, type Grade } from './ai';
+import { fmtScore, gradeRange, type Grade } from './ai';
 
 export function Button({ title, onPress, kind = 'plain', disabled, busy, style }: {
   title: string; onPress: () => void; kind?: 'primary' | 'plain' | 'danger'; disabled?: boolean; busy?: boolean; style?: ViewStyle;
@@ -81,7 +81,7 @@ function SubScore({ label, score, note, extra }: { label: string; score: number;
     <View style={{ gap: 4, flexBasis: '46%', flexGrow: 1 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text style={{ fontWeight: '600', color: C.ink }}>{label}</Text>
-        <Text style={[s.mono, { color: C.ink }]}>{score ? `${score}/10` : '–'}</Text>
+        <Text style={[s.mono, { color: C.ink }]}>{score ? `${fmtScore(score)}/10` : '–'}</Text>
       </View>
       <View style={s.bar}><View style={[s.barFill, { width: `${pct}%` }]} /></View>
       {extra ? <Text style={[s.mono, { fontSize: 12 }]}>{extra}</Text> : null}
@@ -98,8 +98,9 @@ export function GradeSlab({ g }: { g: Grade }) {
       <View style={s.slab}>
         <View style={s.slabHead}>
           <View style={{ flex: 1 }}>
-            <Eyebrow>Estimated PSA grade</Eyebrow>
-            <Muted small>Most likely {g.most_likely} · photo {g.photo_quality}</Muted>
+            <Eyebrow>{g.score != null ? 'Condition score' : 'Estimated PSA grade'}</Eyebrow>
+            <Text style={{ fontWeight: '700', color: C.ink, fontSize: 15 }}>Likely PSA {g.most_likely}</Text>
+            <Muted small>{g.low !== g.high ? `Range PSA ${g.low}–${g.high} · ` : ''}photo {g.photo_quality}</Muted>
           </View>
           <Text style={s.gradeBig}>{gradeRange(g)}</Text>
         </View>

@@ -86,7 +86,7 @@ export default function Binder() {
           <View>
             <CardImage uri={item.image} />
             {(item.qty || 1) > 1 ? <Text style={{ position: 'absolute', top: 6, right: 6, backgroundColor: C.ink, color: C.bg, fontWeight: '700', fontSize: 11, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' }}>×{item.qty}</Text> : null}
-            {item.grade ? <Text style={{ position: 'absolute', left: 6, bottom: 6, backgroundColor: C.surface, color: C.ink, fontWeight: '700', fontSize: 11, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' }}>PSA ~{gradeRange(item.grade)}</Text> : null}
+            {item.grade ? <Text style={{ position: 'absolute', left: 6, bottom: 6, backgroundColor: C.surface, color: C.ink, fontWeight: '700', fontSize: 11, paddingHorizontal: 6, paddingVertical: 2, borderRadius: 6, overflow: 'hidden' }}>{item.grade.score != null ? `Grade ${gradeRange(item.grade)}` : `PSA ~${gradeRange(item.grade)}`}</Text> : null}
             {!item.image ? <Text style={{ position: 'absolute', top: 8, left: 8, right: 8, color: C.muted, fontSize: 12 }}>{item.name}</Text> : null}
           </View>
           <Text numberOfLines={2} style={{ fontWeight: '600', color: C.ink, fontSize: 13 }}>{item.name}</Text>
