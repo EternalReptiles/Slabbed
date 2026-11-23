@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react';
-import { ActivityIndicator, Image, Linking, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Image, Linking, Platform, Pressable, StyleSheet, Text, View, type ViewStyle } from 'react-native';
+
+const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' });
 import { C, CARD_RATIO, FOIL } from './theme';
 import { aud } from './money';
 import { gradeRange, type Grade } from './ai';
@@ -123,8 +125,8 @@ export const s = StyleSheet.create({
   body: { fontSize: 15, color: C.ink },
   muted: { fontSize: 14, color: C.muted },
   eyebrow: { fontSize: 11, fontWeight: '700', letterSpacing: 1, textTransform: 'uppercase', color: C.muted },
-  mono: { fontFamily: 'Menlo', fontSize: 13, color: C.muted, fontVariant: ['tabular-nums'] },
-  money: { fontFamily: 'Menlo', fontWeight: '700', fontSize: 16, color: C.gold, fontVariant: ['tabular-nums'] },
+  mono: { fontFamily: MONO, fontSize: 13, color: C.muted, fontVariant: ['tabular-nums'] },
+  money: { fontFamily: MONO, fontWeight: '700', fontSize: 16, color: C.gold, fontVariant: ['tabular-nums'] },
   panel: { backgroundColor: C.surface, borderWidth: 1, borderColor: C.line, borderRadius: 14, padding: 16, gap: 14 },
   btn: { minHeight: 46, borderRadius: 11, borderWidth: 1, borderColor: C.line, backgroundColor: C.surface, paddingHorizontal: 16, alignItems: 'center', justifyContent: 'center' },
   btnPrimary: { backgroundColor: C.accent, borderColor: C.accent },
@@ -139,6 +141,6 @@ export const s = StyleSheet.create({
   slabOuter: { borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: C.line, backgroundColor: C.surface },
   slab: { padding: 14, gap: 14 },
   slabHead: { flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: C.line, paddingBottom: 10 },
-  gradeBig: { fontSize: 38, fontWeight: '800', color: C.ink, fontFamily: 'Menlo' },
+  gradeBig: { fontSize: 38, fontWeight: '800', color: C.ink, fontFamily: MONO },
   input: { minHeight: 46, borderWidth: 1, borderColor: C.line, borderRadius: 10, backgroundColor: C.surface, paddingHorizontal: 12, fontSize: 15, color: C.ink },
 });

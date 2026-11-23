@@ -16,8 +16,24 @@
         }
       ]
     ],
-    "ios": { "supportsTablet": false, "bundleIdentifier": "com.eternalreptiles.holobinder" },
-    "android": { "package": "com.eternalreptiles.holobinder" },
-    "web": { "output": "single", "bundler": "metro" }
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.eternalreptiles.holobinder"
+    },
+    "android": {
+      "package": "com.eternalreptiles.holobinder"
+    },
+    "web": {
+      "output": "single",
+      "bundler": "metro",
+      "name": "Holo Binder",
+      "shortName": "Holo Binder",
+      "themeColor": "#2F55E4",
+      "backgroundColor": "#EEF1F6"
+    },
+    "experiments": {
+      "baseUrl": "/pokemon",
+      "typedRoutes": false
+    }
   }
 }
