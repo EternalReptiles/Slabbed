@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
-import { Stack } from 'expo-router';
+import { Stack, router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { supabase } from '../lib/supabase';
+import { supabase, useRecovering } from '../lib/supabase';
 import { setUser } from '../lib/binder';
 import { C } from '../lib/theme';
 
@@ -12,6 +12,10 @@ export default function Root() {
     const { data } = supabase.auth.onAuthStateChange((_e, s) => setUser(s?.user.id ?? null));
     return () => data.subscription.unsubscribe();
   }, []);
+
+  // Opened a password-reset link: go to Account to set a new password.
+  const recovering = useRecovering();
+  useEffect(() => { if (recovering) setTimeout(() => router.navigate('/account'), 0); }, [recovering]);
 
   return (
     <>

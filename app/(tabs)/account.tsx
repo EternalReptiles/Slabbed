@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { ScrollView, Text, TextInput, View } from 'react-native';
 import type { Session } from '@supabase/supabase-js';
-import { supabase } from '../../lib/supabase';
+import { endRecovery, supabase, useRecovering, WEB_URL } from '../../lib/supabase';
 import { sync } from '../../lib/binder';
 import { C } from '../../lib/theme';
 import { Button, ErrorText, Muted, Panel, s } from '../../lib/ui';
@@ -15,6 +15,8 @@ export default function Account() {
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState('');
   const [msg, setMsg] = useState('');
+  const [newPw, setNewPw] = useState('');
+  const recovering = useRecovering();
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => setSession(data.session));
@@ -29,6 +31,41 @@ export default function Account() {
     setBusy(false);
     if (error) { setErr(error.message); return; }
     if (kind === 'up' && !data.session) setMsg('Check your email and tap the confirmation link, then sign in here.');
+  }
+
+  async function forgot() {
+    setErr(''); setMsg('');
+    if (!email.trim()) { setErr('Type your email address above first.'); return; }
+    setBusy(true);
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo: WEB_URL });
+    setBusy(false);
+    if (error) { setErr(/rate|limit/i.test(error.message) ? 'Too many emails sent in the last hour. Try again later.' : error.message); return; }
+    setMsg("If there's an account for that email, a reset link is on its way. Open it on this device. It can take a few minutes.");
+  }
+
+  async function saveNewPassword() {
+    setBusy(true); setErr(''); setMsg('');
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    setBusy(false);
+    if (error) { setErr(error.message); return; }
+    setNewPw(''); endRecovery(); setMsg('Password changed. You are signed in.');
+  }
+
+  if (recovering && session) {
+    return (
+      <ScrollView contentContainerStyle={s.screen} keyboardShouldPersistTaps="handled">
+        <View style={{ paddingVertical: 8 }}><Brand size={52} tagline /></View>
+        <Panel>
+          <Text style={s.h2}>Set a new password</Text>
+          <Muted>{session.user.email}</Muted>
+          {msg ? <Text style={{ color: C.good }}>{msg}</Text> : null}
+          <TextInput value={newPw} onChangeText={setNewPw} placeholder="New password (8+ characters)" placeholderTextColor={C.muted}
+            style={s.input} secureTextEntry autoComplete="new-password" textContentType="newPassword" accessibilityLabel="New password" />
+          {err ? <ErrorText>{err}</ErrorText> : null}
+          <Button title="Save new password" kind="primary" onPress={saveNewPassword} busy={busy} disabled={newPw.length < 8} />
+        </Panel>
+      </ScrollView>
+    );
   }
 
   if (session) {
@@ -63,6 +100,7 @@ export default function Account() {
         {msg ? <Text style={{ color: C.good }}>{msg}</Text> : null}
         <Button title="Sign in" kind="primary" onPress={() => go('in')} busy={busy} disabled={!email || password.length < 8} />
         <Button title="Create account" onPress={() => go('up')} disabled={busy || !email || password.length < 8} />
+        <Text style={[s.link, { textAlign: 'center' }]} onPress={busy ? undefined : forgot} accessibilityRole="button">Forgot password?</Text>
       </Panel>
     </ScrollView>
   );
