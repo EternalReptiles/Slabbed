@@ -1,4 +1,4 @@
-# Publishes the web version of the app to https://eternalreptiles.github.io/pokemon/ on every push to main.
+# Publishes the web version of the app to https://eternalreptiles.github.io/<repo name>/ on every push to main.
 name: Website
 on:
   push: { branches: [main] }
@@ -15,8 +15,11 @@ jobs:
       - run: npm ci
       - run: npx expo export --platform web --output-dir dist
         env: { CI: '1' }
-      # Single-page app: send unknown paths (e.g. a refreshed card page) to the app.
-      - run: cp dist/index.html dist/404.html && touch dist/.nojekyll
+      # Home-screen icon for "Add to Home Screen", then a copy of the page for unknown paths (a refreshed card page).
+      - run: |
+          cp assets/icon.png dist/apple-touch-icon.png
+          sed -i 's#</head>#<link rel="apple-touch-icon" href="/${{ github.event.repository.name }}/apple-touch-icon.png"><meta name="apple-mobile-web-app-title" content="Slabbed"></head>#' dist/index.html
+          cp dist/index.html dist/404.html && touch dist/.nojekyll
       - uses: actions/upload-pages-artifact@v3
         with: { path: dist }
   deploy:

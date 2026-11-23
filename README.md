@@ -1,4 +1,8 @@
-# Holo Binder
+# Slabbed
+
+<img src="assets/logo.png" width="96" alt="Slabbed logo">
+
+Web app: https://eternalreptiles.github.io/slabbed/
 
 A phone app (iPhone, Android and web) for Pokémon trading cards:
 

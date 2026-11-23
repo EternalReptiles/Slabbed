@@ -1,6 +1,7 @@
 import { Tabs } from 'expo-router';
 import { Text, type ColorValue } from 'react-native';
 import { C } from '../../lib/theme';
+import { Brand } from '../../lib/Brand';
 
 const icon = (glyph: string) => ({ color }: { color: ColorValue }) => <Text style={{ color, fontSize: 20 }}>{glyph}</Text>;
 
@@ -18,7 +19,7 @@ export default function TabsLayout() {
         sceneStyle: { backgroundColor: C.bg },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Scan', tabBarIcon: icon('◎') }} />
+      <Tabs.Screen name="index" options={{ title: 'Scan', headerTitle: () => <Brand size={30} />, tabBarIcon: icon('◎') }} />
       <Tabs.Screen name="search" options={{ title: 'Search', tabBarIcon: icon('⌕') }} />
       <Tabs.Screen name="binder" options={{ title: 'Binder', tabBarIcon: icon('▦') }} />
       <Tabs.Screen name="account" options={{ title: 'Account', tabBarIcon: icon('◉') }} />

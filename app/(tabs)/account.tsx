@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { sync } from '../../lib/binder';
 import { C } from '../../lib/theme';
 import { Button, ErrorText, Muted, Panel, s } from '../../lib/ui';
+import { Brand } from '../../lib/Brand';
 
 // Sign in to back up your binder and to use scanning (which runs on the server).
 export default function Account() {
@@ -33,6 +34,7 @@ export default function Account() {
   if (session) {
     return (
       <ScrollView contentContainerStyle={s.screen}>
+        <View style={{ paddingVertical: 8 }}><Brand size={52} tagline /></View>
         <Panel>
           <Text style={s.h2}>Signed in</Text>
           <Muted>{session.user.email}</Muted>
@@ -47,6 +49,7 @@ export default function Account() {
 
   return (
     <ScrollView contentContainerStyle={s.screen} keyboardShouldPersistTaps="handled">
+      <View style={{ paddingVertical: 8 }}><Brand size={52} tagline /></View>
       <Panel>
         <View style={{ gap: 4 }}>
           <Text style={s.h2}>Sign in</Text>

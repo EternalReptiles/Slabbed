@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3D63F0"/><stop offset="1" stop-color="#1B34A8"/>
+    </linearGradient>
+    <linearGradient id="foil" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#6EE7F9"/><stop offset="0.35" stop-color="#A78BFA"/>
+      <stop offset="0.65" stop-color="#F9A8D4"/><stop offset="1" stop-color="#FDE68A"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#fff" stop-opacity="0"/><stop offset="0.5" stop-color="#fff" stop-opacity="0.55"/><stop offset="1" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="win"><rect x="352" y="398" width="320" height="436" rx="22"/></clipPath>
+  </defs>
+  <g id="bgLayer"><rect width="1024" height="1024" fill="url(#bg)"/></g>
+  <g id="slab">
+    <!-- case -->
+    <rect x="292" y="156" width="440" height="728" rx="52" fill="#FFFFFF" fill-opacity="0.16" stroke="#FFFFFF" stroke-width="22"/>
+    <!-- grade label -->
+    <rect x="330" y="196" width="364" height="150" rx="20" fill="#FFFFFF"/>
+    <rect x="364" y="236" width="150" height="20" rx="10" fill="#141A2E"/>
+    <rect x="364" y="276" width="104" height="20" rx="10" fill="#141A2E" fill-opacity="0.35"/>
+    <text x="664" y="304" text-anchor="end" font-family="Arial Black, Helvetica Neue, Arial, sans-serif" font-weight="900" font-size="92" fill="#2F55E4">10</text>
+    <!-- holo card -->
+    <rect x="352" y="398" width="320" height="436" rx="22" fill="url(#foil)"/>
+    <g clip-path="url(#win)">
+      <rect x="250" y="380" width="120" height="560" fill="url(#shine)" transform="rotate(28 512 616)"/>
+    </g>
+    <rect x="352" y="398" width="320" height="436" rx="22" fill="none" stroke="#FFFFFF" stroke-width="10" stroke-opacity="0.9"/>
+    <!-- sparkle -->
+    <path d="M512 520 C522 590 534 602 604 612 C534 622 522 634 512 704 C502 634 490 622 420 612 C490 602 502 590 512 520 Z" fill="#FFFFFF"/>
+  </g>
+</svg>
