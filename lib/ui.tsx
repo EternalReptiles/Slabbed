@@ -4,7 +4,7 @@ import { ActivityIndicator, Image, Linking, Platform, Pressable, StyleSheet, Tex
 const MONO = Platform.select({ ios: 'Menlo', android: 'monospace', default: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace' });
 import { C, CARD_RATIO, FOIL } from './theme';
 import { aud } from './money';
-import { fmtScore, gradeRange, type Grade } from './ai';
+import { fmtGrade, gradeRange, type Grade } from './ai';
 
 export function Button({ title, onPress, kind = 'plain', disabled, busy, style }: {
   title: string; onPress: () => void; kind?: 'primary' | 'plain' | 'danger'; disabled?: boolean; busy?: boolean; style?: ViewStyle;
@@ -81,7 +81,7 @@ function SubScore({ label, score, note, extra }: { label: string; score: number;
     <View style={{ gap: 4, flexBasis: '46%', flexGrow: 1 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Text style={{ fontWeight: '600', color: C.ink }}>{label}</Text>
-        <Text style={[s.mono, { color: C.ink }]}>{score ? `${fmtScore(score)}/10` : '–'}</Text>
+        <Text style={[s.mono, { color: C.ink }]}>{score ? `${fmtGrade(score)}/10` : '–'}</Text>
       </View>
       <View style={s.bar}><View style={[s.barFill, { width: `${pct}%` }]} /></View>
       {extra ? <Text style={[s.mono, { fontSize: 12 }]}>{extra}</Text> : null}
@@ -98,11 +98,10 @@ export function GradeSlab({ g }: { g: Grade }) {
       <View style={s.slab}>
         <View style={s.slabHead}>
           <View style={{ flex: 1 }}>
-            <Eyebrow>{g.score != null ? 'Condition score' : 'Estimated PSA grade'}</Eyebrow>
-            <Text style={{ fontWeight: '700', color: C.ink, fontSize: 15 }}>Likely PSA {g.most_likely}</Text>
-            <Muted small>{g.low !== g.high ? `Range PSA ${g.low}–${g.high} · ` : ''}photo {g.photo_quality}</Muted>
+            <Eyebrow>Estimated PSA grade</Eyebrow>
+            <Muted small>{g.low !== g.high ? `Could be PSA ${fmtGrade(g.low)}–${fmtGrade(g.high)} · ` : ''}photo {g.photo_quality}</Muted>
           </View>
-          <Text style={s.gradeBig}>{gradeRange(g)}</Text>
+          <Text style={s.gradeBig}>PSA {gradeRange(g)}</Text>
         </View>
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 14 }}>
           <SubScore label="Centering" score={g.centering?.score} note={g.centering?.note} extra={g.centering?.front} />
@@ -142,6 +141,6 @@ export const s = StyleSheet.create({
   slabOuter: { borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderColor: C.line, backgroundColor: C.surface },
   slab: { padding: 14, gap: 14 },
   slabHead: { flexDirection: 'row', alignItems: 'center', gap: 12, borderBottomWidth: 1, borderBottomColor: C.line, paddingBottom: 10 },
-  gradeBig: { fontSize: 38, fontWeight: '800', color: C.ink, fontFamily: MONO },
+  gradeBig: { fontSize: 32, fontWeight: '800', color: C.ink, fontFamily: MONO },
   input: { minHeight: 46, borderWidth: 1, borderColor: C.line, borderRadius: 10, backgroundColor: C.surface, paddingHorizontal: 12, fontSize: 15, color: C.ink },
 });

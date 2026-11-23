@@ -37,7 +37,6 @@ const IDENTIFY_SCHEMA = obj({
 });
 
 const GRADE_SCHEMA = obj({
-  score: { type: 'number' },
   most_likely: { type: 'number' },
   low: { type: 'number' },
   high: { type: 'number' },
@@ -69,10 +68,10 @@ Judge against PSA's standards:
 - Corners: whitening, rounding, dings.
 - Edges: whitening, chipping, nicks.
 - Surface: scratches, print lines, dents, creases, stains, holo scratches.
-Score centering, corners, edges and surface each from 1.0 to 10.0 to ONE decimal place (e.g. 8.7), using the full precision rather than rounding to whole or half numbers.
-score: your single overall condition score from 1.0 to 10.0 to ONE decimal place (e.g. 8.6). Like PSA, weight it toward the weakest attribute: a card is rarely more than about one point above its worst sub-score.
-most_likely: the official PSA grade that score would most likely receive. PSA grades are whole numbers 1–10 plus half grades 1.5, 2.5 … 8.5 (there is no 9.5).
-low/high: the realistic range of official PSA grades (whole or half grades as above); most_likely sits within it.
+Use PSA's own grade scale throughout: whole numbers 1–10 plus half grades 1.5, 2.5 … 8.5 (there is no 9.5).
+Score centering, corners, edges and surface each on that scale.
+most_likely: the single official PSA grade this card would most likely receive. Like PSA, weight it toward the weakest attribute.
+low/high: the realistic range of PSA grades on the same scale; most_likely sits within it.
 Photos hide small flaws, so be conservative and lower photo_quality when glare, blur or angle limits what you can see.
 Assume grading a card from Australia costs about AUD 50–80 all-in at a standard service level. worth_grading is whether the likely graded value minus that cost clearly beats selling raw.
 advice: one or two short, plain sentences for the owner.`;

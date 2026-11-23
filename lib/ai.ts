@@ -24,7 +24,6 @@ export type GradedPrices = { psa8: number | null; psa9: number | null; psa10: nu
 
 export type Sub = { score: number; note: string };
 export type Grade = {
-  score?: number;          // overall condition, one decimal (e.g. 8.6); missing on older checks
   most_likely: number;
   low: number;
   high: number;
@@ -69,7 +68,7 @@ export const gradeCard = (front: string, back: string | null, card: CardContext 
 export const estimateGraded = (card: CardContext) =>
   call<{ graded_aud: { psa8: number | null; psa9: number | null; psa10: number | null }; notes: string }>({ mode: 'estimate', card });
 
-// One decimal score when we have it ("8.6"), else the grade range from older checks ("8–9").
-export const fmtScore = (n: number | null | undefined) => (n == null || !isFinite(n) ? '–' : (Math.round(n * 10) / 10).toFixed(1));
-export const gradeRange = (g: Grade | null | undefined) =>
-  !g ? '–' : g.score != null ? fmtScore(g.score) : g.low !== g.high ? `${g.low}–${g.high}` : String(g.most_likely);
+// PSA format: whole grades as "9", half grades as "8.5".
+export const fmtGrade = (n: number | null | undefined) =>
+  n == null || !isFinite(n) ? '–' : Number.isInteger(n) ? String(n) : (Math.round(n * 2) / 2).toFixed(1);
+export const gradeRange = (g: Grade | null | undefined) => (g ? fmtGrade(g.most_likely) : '–');
